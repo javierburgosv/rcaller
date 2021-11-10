@@ -45,7 +45,7 @@ import static java.lang.System.currentTimeMillis;
 /**
  *
  * @author Mehmet Hakan Satman mhsatman@yahoo.com http://stdioe.blogspot.com
- * http://www.mhsatman.com http://code.google.com/p/rcaller
+ *         http://www.mhsatman.com http://code.google.com/p/rcaller
  *
  */
 public class RCaller {
@@ -64,13 +64,8 @@ public class RCaller {
     private RCallerOptions rCallerOptions;
     private Random rand = new Random(System.currentTimeMillis());
 
-    protected RCaller(RCode rCode,
-                   ROutputParser parser,
-                   RStreamHandler rOutput,
-                   RStreamHandler rError,
-                   MessageSaver messageSaver,
-                   TempFileService tempFileService,
-                   RCallerOptions rCallerOptions) {
+    protected RCaller(RCode rCode, ROutputParser parser, RStreamHandler rOutput, RStreamHandler rError,
+            MessageSaver messageSaver, TempFileService tempFileService, RCallerOptions rCallerOptions) {
         this.rCode = rCode;
         this.parser = parser;
         this.rOutput = rOutput;
@@ -88,7 +83,8 @@ public class RCaller {
      * @return default RCaller object
      */
     public static RCaller create() {
-        return new RCaller(RCode.create(), new ROutputParser(), new RStreamHandler(null, "Output"), new RStreamHandler(null, "Error"), new MessageSaver(), new TempFileService(), RCallerOptions.create());
+        return new RCaller(RCode.create(), new ROutputParser(), new RStreamHandler(null, "Output"),
+                new RStreamHandler(null, "Error"), new MessageSaver(), new TempFileService(), RCallerOptions.create());
     }
 
     /***
@@ -98,35 +94,40 @@ public class RCaller {
      * @return RCaller object
      */
     public static RCaller create(RCallerOptions rCallerOptions) {
-        return new RCaller(RCode.create(), new ROutputParser(), new RStreamHandler(null, "Output"), new RStreamHandler(null, "Error"), new MessageSaver(), new TempFileService(), rCallerOptions);
+        String tempFileDir = rCallerOptions.getTempFilesDir();
+        TempFileService tfs = tempFileDir != null ? new TempFileService(tempFileDir) : new TempFileService();
+        return new RCaller(RCode.create(), new ROutputParser(), new RStreamHandler(null, "Output"),
+                new RStreamHandler(null, "Error"), new MessageSaver(), tfs, rCallerOptions);
     }
 
     /**
      * Static factory creator with given R code and startup options
      * 
-     * @param rcode RCode object that contains R code that will be run at the startup
+     * @param rcode          RCode object that contains R code that will be run at
+     *                       the startup
      * @param rCallerOptions given startup object
      * @return RCaller object
      */
     public static RCaller create(RCode rcode, RCallerOptions rCallerOptions) {
-        return new RCaller(rcode, new ROutputParser(), new RStreamHandler(null, "Output"), new RStreamHandler(null, "Error"), new MessageSaver(), new TempFileService(), rCallerOptions);
+        String tempFileDir = rCallerOptions.getTempFilesDir();
+        TempFileService tfs = tempFileDir != null ? new TempFileService(tempFileDir) : new TempFileService();
+        return new RCaller(rcode, new ROutputParser(), new RStreamHandler(null, "Output"),
+                new RStreamHandler(null, "Error"), new MessageSaver(), tfs, rCallerOptions);
     }
 
-
     /**
-     * Stops the threads that are emptying the output and error streams of the
-     * live but idle R process. If R is still working, this may cause it to
-     * hang. If R has finished execution, these threads prevent the operating
-     * system from shutting it down, so that the same process is used. Invoke
-     * this method when you have used R online and are finished with it.
+     * Stops the threads that are emptying the output and error streams of the live
+     * but idle R process. If R is still working, this may cause it to hang. If R
+     * has finished execution, these threads prevent the operating system from
+     * shutting it down, so that the same process is used. Invoke this method when
+     * you have used R online and are finished with it.
      *
      * @return true if rOutput and rError are alive, else return false
      */
     public boolean stopStreamConsumers() {
         rOutput.stop();
         rError.stop();
-        return rOutput.isAlive()
-                && rError.isAlive();
+        return rOutput.isAlive() && rError.isAlive();
     }
 
     public void startStreamConsumers(Process process) {
@@ -161,9 +162,9 @@ public class RCaller {
     }
 
     /**
-     * RCaller uses temp directory for many cases. This sometimes causes 
-     * inflations of number of temporary files. This method deletes the
-     * file created by RCaller in temp directory.
+     * RCaller uses temp directory for many cases. This sometimes causes inflations
+     * of number of temporary files. This method deletes the file created by RCaller
+     * in temp directory.
      */
     public void deleteTempFiles() {
         tempFileService.deleteRCallerTempFiles();
@@ -171,12 +172,12 @@ public class RCaller {
     }
 
     /**
-     * Stores the current RCode contained in this RCaller in a temporary file
-     * and return a reference to that file
+     * Stores the current RCode contained in this RCaller in a temporary file and
+     * return a reference to that file
      *
      * @return a reference to the file
-     * @throws ExecutionException if a temporary file cannot
-     * be created or written to
+     * @throws ExecutionException if a temporary file cannot be created or written
+     *                            to
      */
     private File createRSourceFile() throws ExecutionException {
         File f;
@@ -208,12 +209,11 @@ public class RCaller {
     }
 
     /**
-     * Executes the code contained in this RCaller instance in s separate
-     * process. Upon completion the process is killed and none of the R
-     * variables are returned
+     * Executes the code contained in this RCaller instance in s separate process.
+     * Upon completion the process is killed and none of the R variables are
+     * returned
      *
-     * @throws ExecutionException if R cannot be run for some
-     * reason
+     * @throws ExecutionException if R cannot be run for some reason
      */
     public void runOnly() throws ExecutionException {
         this.rCode.getCode().append("q(").append("\"").append("yes").append("\"").append(")\n");
@@ -225,14 +225,14 @@ public class RCaller {
         ProcessBuilder pb = new ProcessBuilder(cmd);
         Map<String, String> env = pb.environment();
         String locale = Globals.standardLocale.toString();
-        if (locale.equals("en")) { //Java shows no-lang locales as "en", R does not understand
+        if (locale.equals("en")) { // Java shows no-lang locales as "en", R does not understand
             String langEnv = System.getenv().get("LANG");
             if ("C.UTF-8".equals(langEnv) || "C".equals(langEnv) || "POSIX".equals(langEnv)) {
                 locale = "C";
             }
         }
         String localeAndCharset = join(".", locale, Globals.standardCharset.toString());
-    
+
         env.put("LC_COLLATE", localeAndCharset);
         env.put("LC_CTYPE", localeAndCharset);
         env.put("LC_MESSAGES", localeAndCharset);
@@ -254,11 +254,13 @@ public class RCaller {
         errorMessageSaver.resetMessage();
         int returnCode;
         try {
-            process = exec(rCallerOptions.getrScriptExecutable() + " " + Globals.getSystemSpecificRPathParameter(rSourceFile));
+            process = exec(
+                    rCallerOptions.getrScriptExecutable() + " " + Globals.getSystemSpecificRPathParameter(rSourceFile));
             startStreamConsumers(process);
             returnCode = process.waitFor();
         } catch (Exception e) {
-            throw new ExecutionException("Can not run " + rCallerOptions.getrScriptExecutable() + ". Reason: " + e.toString());
+            throw new ExecutionException(
+                    "Can not run " + rCallerOptions.getrScriptExecutable() + ". Reason: " + e.toString());
         } finally {
             stopStreamConsumers();
         }
@@ -269,9 +271,9 @@ public class RCaller {
 
     /**
      * Runs the current code in the existing R instance (or in a new one) and
-     * returns the R variable "var". The R process is kept alive and can be
-     * re-used by invoking this method again. When you are done with this
-     * process, you must explicitly stop it.
+     * returns the R variable "var". The R process is kept alive and can be re-used
+     * by invoking this method again. When you are done with this process, you must
+     * explicitly stop it.
      *
      * @see #stopStreamConsumers()
      * @param var The R variable to return
@@ -288,7 +290,8 @@ public class RCaller {
             File outputFile, resultReadyControlFile;
 
             if (rCallerOptions.getrExecutable() == null) {
-                if (handleRFailure("RExecutable is not defined.Please set this" + " variable to full path of R executable binary file.")) {
+                if (handleRFailure("RExecutable is not defined.Please set this"
+                        + " variable to full path of R executable binary file.")) {
                     continue;
                 }
             }
@@ -312,8 +315,8 @@ public class RCaller {
                 try {
                     startOnlineProcess();
                 } catch (Exception e) {
-                    if (handleRFailure("Can not run " + rCallerOptions.getrExecutable() + ". Reason: "
-                            + e.toString())) {
+                    if (handleRFailure(
+                            "Can not run " + rCallerOptions.getrExecutable() + ". Reason: " + e.toString())) {
                         continue;
                     }
                 }
@@ -351,14 +354,17 @@ public class RCaller {
                 }
             }
 
-            done = true; //if we got to there, no exceptions occurred
+            done = true; // if we got to there, no exceptions occurred
         } while (!done && isProcessAlive());
     }
 
     /**
-     * Sleep while controlFile is empty and timeout {$link #rCallerOptions$getMaxWaitTime()} is not expired.
-     * Kill underlying process if timeout is expired.
-     * @param controlFile Sygnal file (separated fron the main result), when it is not empty, calculation is finished
+     * Sleep while controlFile is empty and timeout {$link
+     * #rCallerOptions$getMaxWaitTime()} is not expired. Kill underlying process if
+     * timeout is expired.
+     * 
+     * @param controlFile Sygnal file (separated fron the main result), when it is
+     *                    not empty, calculation is finished
      * @throws InterruptedException
      */
     private void waitRExecute(File controlFile) throws InterruptedException {
@@ -375,7 +381,8 @@ public class RCaller {
     }
 
     /**
-     * Start underlying R process for several usages by {@link #runAndReturnResultOnline(String)}
+     * Start underlying R process for several usages by
+     * {@link #runAndReturnResultOnline(String)}
      */
     private void startOnlineProcess() throws IOException {
         String commandline = rCallerOptions.getrExecutable() + rCallerOptions.getStartUpOptionsAsCommand();
@@ -411,6 +418,7 @@ public class RCaller {
 
     /**
      * Check if underlying R process exists and is alive
+     * 
      * @return true if R process is not null and is alive, false otherwise
      */
     private boolean isProcessAlive() {
@@ -420,10 +428,8 @@ public class RCaller {
         return process.isAlive();
     }
 
-
     /**
-     * Stops underlying R process gracefully.
-     * No calculations should be running.
+     * Stops underlying R process gracefully. No calculations should be running.
      */
     @Deprecated
     public void StopRCallerOnline() {
@@ -431,8 +437,7 @@ public class RCaller {
     }
 
     /**
-     * Stops underlying R process gracefully.
-     * No calculations should be running.
+     * Stops underlying R process gracefully. No calculations should be running.
      */
     public void stopRCallerOnline() {
         if (process != null) {
@@ -443,15 +448,15 @@ public class RCaller {
             } catch (Exception e) {
                 logger.log(Level.SEVERE, e.getMessage());
             }
-            if(Globals.isWindows()){
+            if (Globals.isWindows()) {
                 process.destroy();
             }
         }
     }
 
     /**
-     * Stops underlying R process anyway.
-     * May be used from separate thread to terminate running calculations.
+     * Stops underlying R process anyway. May be used from separate thread to
+     * terminate running calculations.
      */
     @Deprecated
     public void StopRCallerAsync() {
@@ -459,8 +464,8 @@ public class RCaller {
     }
 
     /**
-     * Stops underlying R process anyway.
-     * May be used from separate thread to terminate running calculations.
+     * Stops underlying R process anyway. May be used from separate thread to
+     * terminate running calculations.
      */
     public void stopRCallerAsync() {
         if (process != null) {
@@ -475,6 +480,7 @@ public class RCaller {
 
     /**
      * Remove directory recursively
+     * 
      * @param f Directory to remove (or it's file in recursion)
      */
     private void deleteDirectory(File f) {
@@ -489,12 +495,13 @@ public class RCaller {
     }
 
     /**
-     *  Returns true if it is OK to try again under the current FailurePolicy
-     * @param reason The reason for the failure, e.g. could not start R, could not parse
-     * results, etc...
-     * retries How many retries have been made so far. The method will take care of incrementing this
+     * Returns true if it is OK to try again under the current FailurePolicy
+     * 
+     * @param reason The reason for the failure, e.g. could not start R, could not
+     *               parse results, etc... retries How many retries have been made
+     *               so far. The method will take care of incrementing this
      * @throws ExecutionException if no more retries are permitted, but an exception
-     * still occurs
+     *                            still occurs
      */
     private boolean handleRFailure(String reason) throws ExecutionException {
         int maxFailures = 0;
@@ -529,10 +536,10 @@ public class RCaller {
      * terminated upon completion of this method.
      *
      * @param var the R variable to return
-     * @throws ExecutionException if R could be started; if a
-     * temporary file to store the results could not be created; if the
-     * temporary file is corrupt. The exact cause will be added to the stack
-     * trace
+     * @throws ExecutionException if R could be started; if a temporary file to
+     *                            store the results could not be created; if the
+     *                            temporary file is corrupt. The exact cause will be
+     *                            added to the stack trace
      */
     public void runAndReturnResult(String var) throws ExecutionException {
         File outputFile = tempFileService.createOutputFile();

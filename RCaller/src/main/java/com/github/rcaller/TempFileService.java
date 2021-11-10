@@ -34,68 +34,51 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
-public class TempFileService
-{
+public class TempFileService {
 
     private static final Logger logger = Logger.getLogger(TempFileService.class.getName());
 
     private ArrayList<File> tempFiles;
     private File tempDirectory;
 
-
-    public TempFileService()
-    {
+    public TempFileService() {
         tempFiles = new ArrayList<>();
     }
 
-    public TempFileService(File tempDirectory)
-    {
+    public TempFileService(String tempDirectory) {
         this();
-        this.tempDirectory = tempDirectory;
+        this.tempDirectory = new File(tempDirectory);
     }
 
-    public File createTempFile(String prefix, String suffix) throws IOException
-    {
+    public File createTempFile(String prefix, String suffix) throws IOException {
         File f = tempFiles != null ? File.createTempFile(prefix, suffix, tempDirectory)
                 : File.createTempFile(prefix, suffix);
         tempFiles.add(f);
         return (f);
     }
 
-    public void deleteRCallerTempFiles()
-    {
-        for (File tempFile : tempFiles)
-        {
-            if (!tempFile.delete())
-            {
+    public void deleteRCallerTempFiles() {
+        for (File tempFile : tempFiles) {
+            if (!tempFile.delete()) {
                 logger.log(Level.WARNING, "Couldn't delete file ".concat(tempFile.getName()));
             }
         }
         tempFiles.clear();
     }
 
-    public File createOutputFile()
-    {
-        try
-        {
+    public File createOutputFile() {
+        try {
             return createTempFile("ROutput", "");
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new ExecutionException(
                     "Can not create a temporary file for storing the R results: " + e.getMessage());
         }
     }
 
-    public File createControlFile()
-    {
-        try
-        {
+    public File createControlFile() {
+        try {
             return createTempFile("RControl", "");
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new ExecutionException(
                     "Can not create a temporary file for storing the R results: " + e.getMessage());
         }

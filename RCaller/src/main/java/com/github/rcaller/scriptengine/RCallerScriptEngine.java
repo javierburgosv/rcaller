@@ -27,6 +27,7 @@ package com.github.rcaller.scriptengine;
 
 import com.github.rcaller.EventHandler;
 import com.github.rcaller.rstuff.RCaller;
+import com.github.rcaller.rstuff.RCallerOptions;
 import com.github.rcaller.rstuff.RCode;
 import com.github.rcaller.rstuff.ROutputParser;
 import com.github.rcaller.util.RCodeUtils;
@@ -37,13 +38,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 
-
-public class RCallerScriptEngine
-        implements
-        ScriptEngine,
-        EventHandler,
-        Invocable
-{
+public class RCallerScriptEngine implements ScriptEngine, EventHandler, Invocable {
 
     final private RCaller rcaller;
     private final RCode rcode;
@@ -51,11 +46,19 @@ public class RCallerScriptEngine
     private Bindings bindings;
     private ScriptContext context;
 
-
-    public RCallerScriptEngine()
-    {
+    public RCallerScriptEngine() {
         rcaller = RCaller.create();
         rcode = RCode.create();
+        initialize();
+    }
+
+    public RCallerScriptEngine(RCallerOptions options) {
+        rcaller = RCaller.create(options);
+        rcode = RCode.create();
+        initialize();
+    }
+
+    private void initialize() {
 
         rcode.addRCode("result <- list(a=0)");
         rcaller.setRCode(rcode);
@@ -65,20 +68,17 @@ public class RCallerScriptEngine
     }
 
     @Override
-    public Object eval(String code, ScriptContext sc) throws ScriptException
-    {
+    public Object eval(String code, ScriptContext sc) throws ScriptException {
         return (this.eval(code));
     }
 
     @Override
-    public Object eval(Reader reader, ScriptContext sc) throws ScriptException
-    {
+    public Object eval(Reader reader, ScriptContext sc) throws ScriptException {
         return (this.eval(reader));
     }
 
     @Override
-    public Object eval(String code) throws ScriptException
-    {
+    public Object eval(String code) throws ScriptException {
         rcode.clearOnline();
         rcode.addRCode(code);
         rcode.addRCode("result <- list(a=0)");
@@ -88,46 +88,37 @@ public class RCallerScriptEngine
     }
 
     @Override
-    public Object eval(Reader reader) throws ScriptException
-    {
+    public Object eval(Reader reader) throws ScriptException {
         BufferedReader bufferedReader = new BufferedReader(reader);
         String line;
         StringBuilder stringBuilder = new StringBuilder();
 
-        try
-        {
-            while (true)
-            {
+        try {
+            while (true) {
                 line = bufferedReader.readLine();
-                if (line == null)
-                {
+                if (line == null) {
                     break;
                 }
                 stringBuilder.append(line);
             }
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             throw new ScriptException("Error while reading from reader: " + ioe.toString());
         }
         return (this.eval(stringBuilder.toString()));
     }
 
     @Override
-    public Object eval(String code, Bindings bndngs) throws ScriptException
-    {
+    public Object eval(String code, Bindings bndngs) throws ScriptException {
         return (this.eval(code));
     }
 
     @Override
-    public Object eval(Reader reader, Bindings bindings) throws ScriptException
-    {
+    public Object eval(Reader reader, Bindings bindings) throws ScriptException {
         return (this.eval(reader));
     }
 
     @Override
-    public void put(String name, Object o)
-    {
+    public void put(String name, Object o) {
         rcode.clearOnline();
         StringBuilder code = new StringBuilder();
         RCodeUtils.addRespectToType(code, name, o, false);
@@ -139,86 +130,67 @@ public class RCallerScriptEngine
     }
 
     @Override
-    public Object get(String var)
-    {
+    public Object get(String var) {
         int[] dimension;
         rcode.clearOnline();
         rcode.addRCode("result <- ls()");
         rcaller.runAndReturnResultOnline(var);
         parser = rcaller.getParser();
         parser.parse();
-        try
-        {
+        try {
             // System.out.println(parser.getXMLFileAsString());
             dimension = parser.getDimensions(var);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return (parser.getAsStringArray(var));
         }
         String vartype = parser.getType(var);
-        if (dimension[0] > 1 && dimension[1] > 1)
-        {
+        if (dimension[0] > 1 && dimension[1] > 1) {
             return (parser.getAsDoubleMatrix(var));
-        }
-        else if (vartype.equals("numeric"))
-        {
+        } else if (vartype.equals("numeric")) {
             return (parser.getAsDoubleArray(var));
-        }
-        else if (vartype.equals("character"))
-        {
+        } else if (vartype.equals("character")) {
             return (parser.getAsStringArray(var));
-        }
-        else
-        {
+        } else {
             return (parser.getAsStringArray(var)); // :o
         }
     }
 
     @Override
-    public Bindings getBindings(int i)
-    {
+    public Bindings getBindings(int i) {
         return (this.bindings);
     }
 
     @Override
-    public void setBindings(Bindings bndngs, int i)
-    {
+    public void setBindings(Bindings bndngs, int i) {
         this.bindings = bndngs;
     }
 
     @Override
-    public Bindings createBindings()
-    {
+    public Bindings createBindings() {
         return (new SimpleBindings());
     }
 
     @Override
-    public ScriptContext getContext()
-    {
+    public ScriptContext getContext() {
         return (this.context);
     }
 
     @Override
-    public void setContext(ScriptContext sc)
-    {
+    public void setContext(ScriptContext sc) {
         this.context = sc;
     }
 
     @Override
-    public ScriptEngineFactory getFactory()
-    {
+    public ScriptEngineFactory getFactory() {
         return (new RCallerScriptEngineFactory());
     }
 
     @Override
-    public void messageReceived(String senderName, String msg)
-    {
+    public void messageReceived(String senderName, String msg) {
         System.out.println("RCaller Script Engine Received: (" + senderName + ") " + msg);
     }
 
-    public void close()
-    {
+    public void close() {
         this.rcaller.stopRCallerOnline();
     }
 
@@ -227,25 +199,21 @@ public class RCallerScriptEngine
      */
     @Override
     public Object invokeMethod(Object o, String fname, Object... arguments)
-            throws ScriptException, NoSuchMethodException
-    {
+            throws ScriptException, NoSuchMethodException {
         return (invokeFunction(fname, arguments));
     }
 
     @Override
-    public Object invokeFunction(String fname, Object... arguments) throws ScriptException, NoSuchMethodException
-    {
+    public Object invokeFunction(String fname, Object... arguments) throws ScriptException, NoSuchMethodException {
         int[] dimension = null;
         String var = "fresult";
 
         rcode.clearOnline();
         rcode.addRCode(var + " <- " + fname + "(");
-        for (int i = 0; i < arguments.length; i++)
-        {
+        for (int i = 0; i < arguments.length; i++) {
             NamedArgument named = (NamedArgument) arguments[i];
             RCodeUtils.addRespectToType(rcode.getCode(), named.getName(), named.getObj(), true);
-            if (i != (arguments.length - 1))
-            {
+            if (i != (arguments.length - 1)) {
                 rcode.addRCode(",");
             }
         }
@@ -261,33 +229,22 @@ public class RCallerScriptEngine
         ArrayList<NamedArgument> namedResults = new ArrayList<>();
         ArrayList<String> names = rcaller.getParser().getNames();
 
-        for (String name : names)
-        {
+        for (String name : names) {
             var = name;
-            try
-            {
+            try {
                 dimension = parser.getDimensions(var);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 namedResults.add(NamedArgument.Named(var, parser.getAsStringArray(var)));
             }
             String vartype = parser.getType(var);
             assert dimension != null;
-            if (dimension[0] > 1 && dimension[1] > 1)
-            {
+            if (dimension[0] > 1 && dimension[1] > 1) {
                 namedResults.add(NamedArgument.Named(var, parser.getAsDoubleMatrix(var)));
-            }
-            else if (vartype.equals("numeric"))
-            {
+            } else if (vartype.equals("numeric")) {
                 namedResults.add(NamedArgument.Named(var, parser.getAsDoubleArray(var)));
-            }
-            else if (vartype.equals("character"))
-            {
+            } else if (vartype.equals("character")) {
                 namedResults.add(NamedArgument.Named(var, parser.getAsStringArray(var)));
-            }
-            else
-            {
+            } else {
                 namedResults.add(NamedArgument.Named(var, parser.getAsStringArray(var)));
             }
         }
@@ -295,14 +252,12 @@ public class RCallerScriptEngine
     }
 
     @Override
-    public <T> T getInterface(Class<T> type)
-    {
+    public <T> T getInterface(Class<T> type) {
         return (null);
     }
 
     @Override
-    public <T> T getInterface(Object o, Class<T> type)
-    {
+    public <T> T getInterface(Object o, Class<T> type) {
         return (null);
     }
 
@@ -311,8 +266,7 @@ public class RCallerScriptEngine
      */
 
     // Access to delete temp files functionality
-    public void deleteTempFiles()
-    {
+    public void deleteTempFiles() {
         this.rcaller.deleteTempFiles();
     }
 }

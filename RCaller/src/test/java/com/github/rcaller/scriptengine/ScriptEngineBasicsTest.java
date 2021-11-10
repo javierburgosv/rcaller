@@ -56,9 +56,9 @@ public class ScriptEngineBasicsTest {
 
     @Test
     public void ScriptEngineManagerTest() {
-        //this test will always fail to produce a RCallerScriptEngine
-        //because the file in META-INF/services will be loaded when
-        //the library is packaged in a jar
+        // this test will always fail to produce a RCallerScriptEngine
+        // because the file in META-INF/services will be loaded when
+        // the library is packaged in a jar
         message("Creating an engine using ScriptEngineManager");
         ScriptEngineManager manager = new ScriptEngineManager();
         ScriptEngine en = manager.getEngineByName("RCaller");
@@ -120,7 +120,7 @@ public class ScriptEngineBasicsTest {
     @Test
     public void PutDobleArrayTest() throws ScriptException {
         message("Passing and retrieving double array to R...");
-        double[] a = new double[]{19.0, 17.0, 23.0};
+        double[] a = new double[] { 19.0, 17.0, 23.0 };
         engine.put("a", a);
         engine.eval("a <- sort(a)");
         double[] result = (double[]) engine.get("a");
@@ -132,7 +132,7 @@ public class ScriptEngineBasicsTest {
     @Test
     public void PutIntArrayTest() throws ScriptException {
         message("Pass & Retreive integer array...");
-        int[] a = new int[]{19, 17, 23};
+        int[] a = new int[] { 19, 17, 23 };
         engine.put("a", a);
         engine.eval("a <- sort(a)");
         double[] result = (double[]) engine.get("a");
@@ -144,7 +144,7 @@ public class ScriptEngineBasicsTest {
     @Test
     public void PutLongArrayTest() throws ScriptException {
         message("Pass & Retreive long array...");
-        long[] a = new long[]{19L, 17L, 23L};
+        long[] a = new long[] { 19L, 17L, 23L };
         engine.put("a", a);
         engine.eval("a <- sort(a)");
         double[] result = (double[]) engine.get("a");
@@ -156,7 +156,7 @@ public class ScriptEngineBasicsTest {
     @Test
     public void PutShortArrayTest() throws ScriptException {
         message("Pass & Retreive short array...");
-        short[] a = new short[]{19, 17, 23};
+        short[] a = new short[] { 19, 17, 23 };
         engine.put("a", a);
         engine.eval("a <- sort(a)");
         double[] result = (double[]) engine.get("a");
@@ -168,7 +168,7 @@ public class ScriptEngineBasicsTest {
     @Test
     public void PutStringArrayTest() throws ScriptException {
         message("Pass & Retreive String array...");
-        String[] a = new String[]{"19", "17", "23"};
+        String[] a = new String[] { "19", "17", "23" };
         engine.put("a", a);
         String[] result = (String[]) engine.get("a");
         assertEquals(result[0], "19");
@@ -179,7 +179,7 @@ public class ScriptEngineBasicsTest {
     @Test
     public void PutDoubleMatrix() throws ScriptException {
         message("Send and retrieve double matrix...");
-        double[][] mat = new double[][]{{1, 2, 3}, {4, 5, 6}};
+        double[][] mat = new double[][] { { 1, 2, 3 }, { 4, 5, 6 } };
         engine.put("a", mat);
         double[][] result = (double[][]) engine.get("a");
         assertEquals(2, result.length);
@@ -200,37 +200,23 @@ public class ScriptEngineBasicsTest {
                 + "                      methods = list(\n"
                 + "                        initialize = function(name, surname, age){\n"
                 + "                          .self$name = name\n"
-                + "                          .self$surname = surname\n"
-                + "                          .self$age = age\n"
-                + "                        },\n"
-                + "                        \n"
+                + "                          .self$surname = surname\n" + "                          .self$age = age\n"
+                + "                        },\n" + "                        \n"
                 + "                        toString = function(){\n"
                 + "                          cat(.self$name, \" \",.self$surname, \" \", .self$age)\n"
-                + "                        },\n"
-                + "                        \n"
-                + "                        getName = function(){\n"
-                + "                          return(.self$name)\n"
-                + "                        },\n"
-                + "                        \n"
+                + "                        },\n" + "                        \n"
+                + "                        getName = function(){\n" + "                          return(.self$name)\n"
+                + "                        },\n" + "                        \n"
                 + "                        setName = function(name){\n"
-                + "                          .self$name = name\n"
-                + "                        },\n"
-                + "                        \n"
-                + "                        getSurname = function(){\n"
-                + "                          return(.self$surname)\n"
-                + "                        },\n"
-                + "                        \n"
-                + "                        setSurname = function(surname){\n"
-                + "                          .self$surname = surname\n"
-                + "                        },\n"
-                + "                        \n"
-                + "                        getAge = function(){\n"
-                + "                          return(.self$age)\n"
-                + "                        },\n"
-                + "                        \n"
-                + "                        setAge = function(age){\n"
-                + "                          .self$age = age\n"
-                + "                        }\n"
+                + "                          .self$name = name\n" + "                        },\n"
+                + "                        \n" + "                        getSurname = function(){\n"
+                + "                          return(.self$surname)\n" + "                        },\n"
+                + "                        \n" + "                        setSurname = function(surname){\n"
+                + "                          .self$surname = surname\n" + "                        },\n"
+                + "                        \n" + "                        getAge = function(){\n"
+                + "                          return(.self$age)\n" + "                        },\n"
+                + "                        \n" + "                        setAge = function(age){\n"
+                + "                          .self$age = age\n" + "                        }\n"
                 + "                    )\n)");
 
         engine.eval("p <- Person$new('NAME','SURNAME',100)");
@@ -249,8 +235,8 @@ public class ScriptEngineBasicsTest {
     @Test
     public void GetSetDataFrameTest() throws ScriptException, NoSuchMethodException {
         message("get/set data.frame ...");
-        String[] names = new String[]{"x", "y"};
-        Object[][] data = new Object[][]{{1.0, 1.0, 1.0, 1.0, 1.0}, {1.0, 2.0, 3.0, 4.0, 5.0}};
+        String[] names = new String[] { "x", "y" };
+        Object[][] data = new Object[][] { { 1.0, 1.0, 1.0, 1.0, 1.0 }, { 1.0, 2.0, 3.0, 4.0, 5.0 } };
         DataFrame dataFrame = DataFrame.create(data, names);
         engine.put("mydf", dataFrame);
 

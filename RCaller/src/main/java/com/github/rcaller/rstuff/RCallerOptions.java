@@ -14,7 +14,10 @@ public class RCallerOptions {
     private RProcessStartUpOptions rProcessStartUpOptions;
     private int retries;
 
-    private RCallerOptions(String rScriptExecutable, String rExecutable, FailurePolicy failurePolicy, long maxWaitTime, long initialWaitTime, RProcessStartUpOptions rProcessStartUpOptions) {
+    private String tempFilesDir;
+
+    private RCallerOptions(String rScriptExecutable, String rExecutable, FailurePolicy failurePolicy, long maxWaitTime,
+            long initialWaitTime, RProcessStartUpOptions rProcessStartUpOptions, String tempFilesDir) {
         this.rScriptExecutable = rScriptExecutable;
         this.rExecutable = rExecutable;
         this.failurePolicy = failurePolicy;
@@ -22,6 +25,8 @@ public class RCallerOptions {
         this.initialWaitTime = initialWaitTime;
         this.rProcessStartUpOptions = rProcessStartUpOptions;
         this.retries = 0;
+
+        this.tempFilesDir = tempFilesDir;
     }
 
     /**
@@ -30,31 +35,52 @@ public class RCallerOptions {
      */
     public static RCallerOptions create() {
         Globals.detect_current_rscript();
-        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, FailurePolicy.RETRY_5, Long.MAX_VALUE, ININITAL_WAIT_TIME, RProcessStartUpOptions.create());
+        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, FailurePolicy.RETRY_5, Long.MAX_VALUE,
+                ININITAL_WAIT_TIME, RProcessStartUpOptions.create(), Globals.RCTemp);
     }
 
     public static RCallerOptions create(RProcessStartUpOptions rProcessStartUpOptions) {
         Globals.detect_current_rscript();
-        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, FailurePolicy.RETRY_5, Long.MAX_VALUE, ININITAL_WAIT_TIME, rProcessStartUpOptions);
+        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, FailurePolicy.RETRY_5, Long.MAX_VALUE,
+                ININITAL_WAIT_TIME, rProcessStartUpOptions, Globals.RCTemp);
+    }
+
+    public static RCallerOptions create(String rcTempDir) {
+        Globals.detect_current_rscript();
+        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, FailurePolicy.RETRY_5, Long.MAX_VALUE,
+                ININITAL_WAIT_TIME, RProcessStartUpOptions.create(), rcTempDir);
     }
 
     public static RCallerOptions create(FailurePolicy failurePolicy, long maxWaitTime) {
         Globals.detect_current_rscript();
-        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, failurePolicy, maxWaitTime, ININITAL_WAIT_TIME, RProcessStartUpOptions.create());
+        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, failurePolicy, maxWaitTime,
+                ININITAL_WAIT_TIME, RProcessStartUpOptions.create(), Globals.RCTemp);
     }
 
-    public static RCallerOptions create(FailurePolicy failurePolicy, long maxWaitTime, RProcessStartUpOptions rProcessStartUpOptions) {
+    public static RCallerOptions create(FailurePolicy failurePolicy, long maxWaitTime,
+            RProcessStartUpOptions rProcessStartUpOptions) {
         Globals.detect_current_rscript();
-        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, failurePolicy, maxWaitTime, ININITAL_WAIT_TIME, rProcessStartUpOptions);
+        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, failurePolicy, maxWaitTime,
+                ININITAL_WAIT_TIME, rProcessStartUpOptions, Globals.RCTemp);
     }
 
-    public static RCallerOptions create(FailurePolicy failurePolicy, long maxWaitTime, long initialWaitTime, RProcessStartUpOptions rProcessStartUpOptions) {
+    public static RCallerOptions create(FailurePolicy failurePolicy, long maxWaitTime, long initialWaitTime,
+            RProcessStartUpOptions rProcessStartUpOptions) {
         Globals.detect_current_rscript();
-        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, failurePolicy, maxWaitTime, initialWaitTime, rProcessStartUpOptions);
+        return new RCallerOptions(Globals.Rscript_current, Globals.R_current, failurePolicy, maxWaitTime,
+                initialWaitTime, rProcessStartUpOptions, Globals.RCTemp);
     }
 
-    public static RCallerOptions create(String rScriptExecutable, String rExecutable, FailurePolicy failurePolicy, long maxWaitTime, long initialWaitTime, RProcessStartUpOptions rProcessStartUpOptions) {
-        return new RCallerOptions(rScriptExecutable, rExecutable, failurePolicy, maxWaitTime, initialWaitTime, rProcessStartUpOptions);
+    public static RCallerOptions create(String rScriptExecutable, String rExecutable, FailurePolicy failurePolicy,
+            long maxWaitTime, long initialWaitTime, RProcessStartUpOptions rProcessStartUpOptions) {
+        return new RCallerOptions(rScriptExecutable, rExecutable, failurePolicy, maxWaitTime, initialWaitTime,
+                rProcessStartUpOptions, Globals.RCTemp);
+    }
+
+    public static RCallerOptions create(String rScriptExecutable, String rExecutable, FailurePolicy failurePolicy,
+            long maxWaitTime, long initialWaitTime, RProcessStartUpOptions rProcessStartUpOptions, String rcTempDir) {
+        return new RCallerOptions(rScriptExecutable, rExecutable, failurePolicy, maxWaitTime, initialWaitTime,
+                rProcessStartUpOptions, rcTempDir);
     }
 
     public String getrScriptExecutable() {
@@ -67,6 +93,10 @@ public class RCallerOptions {
 
     public FailurePolicy getFailurePolicy() {
         return failurePolicy;
+    }
+
+    public String getTempFilesDir() {
+        return tempFilesDir;
     }
 
     /**

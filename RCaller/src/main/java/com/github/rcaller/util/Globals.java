@@ -43,15 +43,18 @@ public class Globals {
     public static String RScript_Linux = "/usr/bin/Rscript";
     public static String RScript_Mac = "/usr/local/bin/Rscript";
     public static String Rscript_current;
-    
+
     public static String R_Windows = "C:\\Program Files\\R\\R-3.0.2\\bin\\R.exe";
     public static String R_Linux = "/usr/bin/R";
     public static String R_Mac = "/usr/local/bin/R";
     public static String R_current;
-    
+
+    public static String RCTemp_Linux = "/tmp";
+    public static String RCTemp;
+
     public static Locale standardLocale = Locale.getDefault();
     public static Charset standardCharset = StandardCharsets.UTF_8;
-    
+
     public static GraphicsTheme theme = new DefaultTheme();
 
     public final static String version = "RCaller 3.0";
@@ -71,7 +74,7 @@ public class Globals {
                     return pathname.isDirectory() && pathname.getName().startsWith("R-");
                 }
             });
-            if(rVersions != null) {
+            if (rVersions != null) {
                 Arrays.sort(rVersions);
                 File rHome = rVersions[rVersions.length - 1];
                 File rBin = new File(rHome, "bin");
@@ -91,16 +94,19 @@ public class Globals {
         if (isWindows()) {
             Rscript_current = RScript_Windows;
             R_current = R_Windows;
-        } else if(isMac()) {
+        } else if (isMac()) {
             Rscript_current = RScript_Mac;
             R_current = R_Mac;
         } else {
             Rscript_current = RScript_Linux;
             R_current = R_Linux;
+            RCTemp = RCTemp_Linux;
         }
     }
-    
-    public static boolean isMac() { return System.getProperty("os.name").contains("Mac"); }
+
+    public static boolean isMac() {
+        return System.getProperty("os.name").contains("Mac");
+    }
 
     public static boolean isWindows() {
         return System.getProperty("os.name").contains("Windows");
@@ -135,7 +141,8 @@ public class Globals {
     /**
      * Sets the default location of Rscript executable manually.
      *
-     * Note that this also sets the default Rscript location for the platform (for the session).
+     * Note that this also sets the default Rscript location for the platform (for
+     * the session).
      *
      * @param rscript_current path to the Rscript executable
      */
@@ -145,7 +152,7 @@ public class Globals {
         // otherwise detect_current_rscript() may overwrite Rscript_current unexpectedly
         if (isWindows()) {
             RScript_Windows = rscript_current;
-        } else if(isMac()) {
+        } else if (isMac()) {
             RScript_Mac = rscript_current;
         } else {
             RScript_Linux = rscript_current;
@@ -155,7 +162,8 @@ public class Globals {
     /**
      * Sets the default location of R executable manually.
      *
-     * Note that this also sets the default R location for the platform (for the session).
+     * Note that this also sets the default R location for the platform (for the
+     * session).
      *
      * @param r_current path to the R executable
      */
@@ -165,7 +173,8 @@ public class Globals {
         // otherwise detect_current_rscript() may overwrite R_current unexpectedly
         if (isWindows()) {
             R_Windows = R_current;
-        } if(isMac()) {
+        }
+        if (isMac()) {
             R_Mac = R_current;
         } else {
             R_Linux = r_current;
@@ -176,7 +185,7 @@ public class Globals {
      * Convenience method to set both Rscript and R default paths in one call.
      *
      * @param rscript_current path to the Rscript executable
-     * @param r_current path to the R executable
+     * @param r_current       path to the R executable
      */
     public static void setRPaths(String rscript_current, String r_current) {
         setRscriptCurrent(rscript_current);
@@ -184,18 +193,20 @@ public class Globals {
     }
 
     /**
-     * Convenience method to convert parameters for R that contain a path to the correct format.
+     * Convenience method to convert parameters for R that contain a path to the
+     * correct format.
      *
      * @param file object for which the absolute patch is needed
      */
-    public static String getSystemSpecificRPathParameter(File file)
-    {
-        String path = isWindows() ? file.getAbsolutePath().toString().replace("\\","/") : file.getAbsolutePath().toString();
+    public static String getSystemSpecificRPathParameter(File file) {
+        String path = isWindows() ? file.getAbsolutePath().toString().replace("\\", "/")
+                : file.getAbsolutePath().toString();
         return path;
     }
-    
+
     /**
-     * Sets charset to be used with locale in JVM environment managed by ProcessBuilder.
+     * Sets charset to be used with locale in JVM environment managed by
+     * ProcessBuilder.
      *
      * Default charset is UTF-8.
      *
@@ -204,13 +215,15 @@ public class Globals {
     public static void setChatset(Charset charset) {
         standardCharset = charset;
     }
-    
+
     /**
-     * Sets locale to be used with charset in in JVM environment managed by ProcessBuilder.
+     * Sets locale to be used with charset in in JVM environment managed by
+     * ProcessBuilder.
      *
      * Default locale is the current locale for this instance of JVM.
      *
-     * @param locale locale to be set with charset in environment managed by ProcessBuilder
+     * @param locale locale to be set with charset in environment managed by
+     *               ProcessBuilder
      */
     public static void setLocale(Locale locale) {
         standardLocale = locale;
